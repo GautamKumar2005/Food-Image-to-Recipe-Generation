@@ -1,0 +1,45 @@
+{% extends "header.html" %}
+{% block content %}
+
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <span class="hero-subtitle mb-2 d-block">About CuisineAI</span>
+                <h1 class="hero-title mb-4">Empowering Kitchens <br>With Applied AI.</h1>
+                <p class="hero-desc">CuisineAI was born from a passion for both technology and culinary arts. Our mission is to simplify cooking and discover new flavors using the power of AI-driven image recognition and recipe synthesis.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4 border-0 shadow-lg rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&q=80&w=1470&ixlib=rb-4.0.3" class="img-fluid rounded-lg" alt="AI in kitchen">
+                </div>
+            </div>
+        </div>
+
+        <div class="row pt-5">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4 border-0 shadow-sm rounded-lg text-center">
+                    <div class="about-icon mx-auto"><i class="fas fa-eye"></i></div>
+                    <h5 class="font-weight-bold mb-3">AI Vision</h5>
+                    <p class="text-muted mb-0">Our model uses computer vision to identify food items with incredible precision, understanding both common and exotic ingredients.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4 border-0 shadow-sm rounded-lg text-center">
+                    <div class="about-icon mx-auto"><i class="fas fa-terminal"></i></div>
+                    <h5 class="font-weight-bold mb-3">Recipe Synthesis</h5>
+                    <p class="text-muted mb-0">Beyond mere identification, we generate complete, structured cooking instructions using state-of-the-art NLP models.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-4 border-0 shadow-sm rounded-lg text-center">
+                    <div class="about-icon mx-auto"><i class="fas fa-users"></i></div>
+                    <h5 class="font-weight-bold mb-3">Chef-Approved</h5>
+                    <p class="text-muted mb-0">Our recipes are designed to be accessible for everyone, from home cooks to professional chefs looking for inspiration.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

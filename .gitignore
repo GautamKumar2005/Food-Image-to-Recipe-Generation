@@ -1,0 +1,24 @@
+# Large model files
+*.ckpt
+*.pt
+*.pth
+
+# Node modules
+frontend/node_modules/
+
+# Env files
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+frontend/.next/
+.next/
+node_modules/
+frontend/node_modules/
+
