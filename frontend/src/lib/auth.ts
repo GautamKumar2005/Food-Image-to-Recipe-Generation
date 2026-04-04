@@ -5,6 +5,7 @@ import { User } from "@/models";
 import bcrypt from "bcryptjs"; // Need to install this
 
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     session: {
         strategy: "jwt"
     },
