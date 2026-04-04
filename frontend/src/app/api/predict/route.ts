@@ -68,9 +68,16 @@ export async function POST(req: NextRequest) {
                     const parsedData = JSON.parse(finalResult);
                     if (parsedData.error) {
                         console.error("[Next.js BRIDGE] Logic Error:", parsedData.error);
-                        console.error("[Next.js BRIDGE] Logic Traceback:", parsedData.traceback);
                         resolve(NextResponse.json({ error: parsedData.error, details: parsedData.traceback }, { status: 500 }));
                     } else {
+                        // Convert the uploaded image to Base64 so it can be stored in MongoDB
+                        // This ensures history images work even after container restarts
+                        const imageBase64 = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
+                        parsedData.imageUrl = imageBase64;
+                        
+                        // Cleanup the temp file after we're done
+                        try { fs.unlinkSync(tempFilePath); } catch (e) {}
+                        
                         resolve(NextResponse.json(parsedData));
                     }
                 } catch (e) {
