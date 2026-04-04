@@ -70,19 +70,21 @@ export async function POST(req: NextRequest) {
                         console.error("[Next.js BRIDGE] Logic Error:", parsedData.error);
                         resolve(NextResponse.json({ error: parsedData.error, details: parsedData.traceback }, { status: 500 }));
                     } else {
-                        // Convert the uploaded image to Base64 so it can be stored in MongoDB
-                        // This ensures history images work even after container restarts
-                        const imageBase64 = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
-                        parsedData.imageUrl = imageBase64;
-                        
-                        // Cleanup the temp file after we're done
-                        try { fs.unlinkSync(tempFilePath); } catch (e) {}
-                        
+                        // Convert image to Base64 so it persists in MongoDB
+                        // (temp_uploads is ephemeral on Hugging Face)
+                        try {
+                            const imageBuffer = fs.readFileSync(tempFilePath);
+                            const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+                            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+                            const base64Image = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
+                            parsedData.imageUrl = base64Image;
+                        } catch (imgErr) {
+                            console.warn("[Next.js BRIDGE] Could not encode image to base64:", imgErr);
+                        }
                         resolve(NextResponse.json(parsedData));
                     }
                 } catch (e) {
                     console.error("[Next.js BRIDGE] Parse Error:", e);
-                    console.error("[Next.js BRIDGE] Raw Result Received:", result);
                     resolve(NextResponse.json({ error: "Invalid response from AI engine" }, { status: 500 }));
                 }
             });
