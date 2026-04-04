@@ -6,6 +6,20 @@ import bcrypt from "bcryptjs"; // Need to install this
 
 export const authOptions: NextAuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
+    // Required for Hugging Face Spaces proxy environment
+    trustHost: true,
+    useSecureCookies: process.env.NODE_ENV === "production",
+    cookies: {
+        sessionToken: {
+            name: `__Secure-next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "none",
+                path: "/",
+                secure: true,
+            },
+        },
+    },
     session: {
         strategy: "jwt"
     },
