@@ -5,10 +5,42 @@ import { User } from "@/models";
 import bcrypt from "bcryptjs"; // Need to install this
 
 export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || "fallback-secret-please-set-in-env",
     session: {
-        strategy: "jwt"
+        strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
+    // Fix for Hugging Face proxy: cookies must allow cross-site delivery
+    ...(process.env.NODE_ENV === "production" && {
+        cookies: {
+            sessionToken: {
+                name: `__Secure-next-auth.session-token`,
+                options: {
+                    httpOnly: true,
+                    sameSite: "none" as const,
+                    path: "/",
+                    secure: true,
+                },
+            },
+            callbackUrl: {
+                name: `__Secure-next-auth.callback-url`,
+                options: {
+                    sameSite: "none" as const,
+                    path: "/",
+                    secure: true,
+                },
+            },
+            csrfToken: {
+                name: `__Host-next-auth.csrf-token`,
+                options: {
+                    httpOnly: true,
+                    sameSite: "none" as const,
+                    path: "/",
+                    secure: true,
+                },
+            },
+        },
+    } as Partial<NextAuthOptions>),
     providers: [
         CredentialsProvider({
             name: "Credentials",
