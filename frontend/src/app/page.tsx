@@ -149,11 +149,14 @@ function Dashboard() {
             <Link href="/history" className="hover:text-orange-500 transition-colors">History</Link>
             {session ? (
                 <div className="flex items-center gap-3">
-                    <Link href="/profile" className="flex items-center gap-2 bg-slate-50 border border-slate-200/50 px-4 py-2 rounded-2xl hover:bg-white hover:shadow-md transition-all group">
-                        <div className="w-6 h-6 rounded-lg bg-orange-500 flex items-center justify-center text-white">
-                            <User className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                    <Link href="/profile" className="flex items-center gap-2 bg-orange-50 border border-orange-200/50 px-3 py-1.5 rounded-2xl hover:bg-orange-100 hover:shadow-md transition-all group">
+                        <div className="w-7 h-7 rounded-xl bg-orange-500 flex items-center justify-center text-white font-black text-xs shadow-md shadow-orange-500/30">
+                            {session.user?.name?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5" />}
                         </div>
-                        <span className="text-[10px] uppercase tracking-widest font-black hidden lg:inline">Profile</span>
+                        <div className="hidden lg:flex flex-col">
+                            <span className="text-[9px] uppercase tracking-widest font-black text-orange-400">Signed in as</span>
+                            <span className="text-xs font-black text-slate-900 leading-tight max-w-[100px] truncate">{session.user?.name || session.user?.email}</span>
+                        </div>
                     </Link>
                     <button onClick={() => signOut()} className="bg-slate-900 text-white px-5 py-2 rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-slate-800 transition-colors border border-transparent active:scale-95">Logout</button>
                 </div>
@@ -179,7 +182,16 @@ function Dashboard() {
                     <Link href="/history" onClick={() => setIsMenuOpen(false)} className="text-sm font-black uppercase tracking-widest text-slate-900 py-3 border-b border-slate-50">History</Link>
                     {session ? (
                         <>
-                            <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="text-sm font-black uppercase tracking-widest text-slate-900 py-3 border-b border-slate-50">Profile</Link>
+                            <div className="flex items-center gap-3 py-3 border-b border-slate-50">
+                                <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-orange-500/30">
+                                    {session.user?.name?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-orange-400 font-black uppercase tracking-widest">Signed in as</p>
+                                    <p className="text-sm font-black text-slate-900">{session.user?.name || session.user?.email}</p>
+                                </div>
+                            </div>
+                            <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="text-sm font-black uppercase tracking-widest text-slate-900 py-3 border-b border-slate-50">My Profile</Link>
                             <button onClick={() => { signOut(); setIsMenuOpen(false); }} className="text-sm font-black uppercase tracking-widest text-red-500 py-3 text-left">Logout</button>
                         </>
                     ) : (
