@@ -39,12 +39,19 @@ RUN mkdir -p /app/temp_uploads && chmod 777 /app/temp_uploads
 
 # 8. Build the Next.js app 
 WORKDIR /app/frontend
-# Use dummy variables during build so Next.js doesn't crash
-# These will be replaced by your REAL variables in Space Settings at runtime
-ENV DATABASE_URL="mongodb://dummy"
-ENV NEXTAUTH_SECRET="dummy"
-ENV NEXTAUTH_URL="http://localhost:7860"
+# Use ARG (not ENV) so these dummy values ONLY exist during build.
+# At runtime, Hugging Face Space Secrets will supply the REAL values.
+ARG DATABASE_URL="mongodb://dummy"
+ARG NEXTAUTH_SECRET="dummy"
+ARG NEXTAUTH_URL="http://localhost:7860"
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
 RUN npm run build
+# Clear dummy build-time values. Real values come from HF Space Secrets at runtime.
+ENV DATABASE_URL=""
+ENV NEXTAUTH_SECRET=""
+ENV NEXTAUTH_URL=""
 
 # Final configuration for Hugging Face Spaces (Port 7860 and User 1000)
 EXPOSE 7860

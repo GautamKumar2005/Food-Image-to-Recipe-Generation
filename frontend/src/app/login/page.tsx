@@ -4,13 +4,14 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Utensils, Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -127,13 +128,21 @@ export default function AuthPage() {
               <Lock className="w-5 h-5"/>
             </span>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               required
-              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-transparent focus:border-orange-500/50 focus:bg-white rounded-2xl outline-none transition-all font-semibold"
+              className="w-full pl-12 pr-14 py-4 bg-slate-50 border border-transparent focus:border-orange-500/50 focus:bg-white rounded-2xl outline-none transition-all font-semibold"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-500 transition-colors focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
+            </button>
           </div>
 
           <button
