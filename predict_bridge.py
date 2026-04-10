@@ -1,46 +1,75 @@
 import sys
 import os
 import json
-import argparse
 
-# Setup paths
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# current_dir points to project root Food_Recipe_App
-sys.path.append(current_dir)
-
-# Fix for Unicode/Emoji printing errors on some Windows environments
+# Fix for Unicode/Emoji printing errors on some environments
 import io
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
+# Setup paths — current_dir is the project root (Food_Recipe_App/)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
 def run_prediction(image_path):
     try:
-        # Import the core Flask app to set its root_path before running output
-        from Foodimg2Ing import app
-        # Ensure it points to the correct subdirectory for 'data', 'static' etc.
-        app.root_path = os.path.join(current_dir, "Foodimg2Ing")
+        print("🔍 Starting prediction...", flush=True)
+
+        if not os.path.exists(image_path):
+            return {"error": f"Image file not found: {image_path}"}
+
+        # Pass data_dir explicitly — avoids needing Flask app context
+        data_dir = os.path.join(current_dir, "Foodimg2Ing", "data")
+        print(f"📂 Data dir: {data_dir}", flush=True)
 
         from Foodimg2Ing.output import output
-        
-        title, ingredients, recipe = output(image_path)
-        
+        title, ingredients, recipe = output(image_path, data_dir=data_dir)
+
+        # Pick the first valid result
+        result_title = "Unknown Dish"
+        result_ingredients = []
+        result_recipe = []
+
+        for i in range(len(title)):
+            t = title[i] if i < len(title) else ""
+            ing = ingredients[i] if i < len(ingredients) else []
+            rec = recipe[i] if i < len(recipe) else []
+
+            # Skip clearly invalid results
+            if t and "Not a valid" not in t and "Error" not in t and len(ing) > 0:
+                result_title = t
+                result_ingredients = ing if isinstance(ing, list) else list(ing)
+                result_recipe = rec if isinstance(rec, list) else [rec]
+                break
+
+        # Fallback: use first result regardless
+        if result_title == "Unknown Dish" and len(title) > 0:
+            result_title = title[0] if title[0] else "Unknown Dish"
+            result_ingredients = list(ingredients[0]) if ingredients else []
+            result_recipe = list(recipe[0]) if isinstance(recipe[0], list) else [recipe[0]] if recipe else []
+
         return {
-            "title": title[0] if title else "Unknown",
-            "ingredients": ingredients[0] if ingredients else [],
-            "recipe": recipe[0] if recipe else [],
-            "imageUrl": f"/temp_uploads/{os.path.basename(image_path)}"
+            "title": result_title,
+            "ingredients": result_ingredients,
+            "recipe": result_recipe,
         }
+
     except Exception as e:
         import traceback
         return {"error": str(e), "traceback": traceback.format_exc()}
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("image", help="Path to the image file")
-    args = parser.parse_args()
-    
-    result = run_prediction(args.image)
+    if len(sys.argv) < 2:
+        print("---JSON_START---")
+        print(json.dumps({"error": "No image path provided"}))
+        print("---JSON_END---")
+        sys.exit(1)
+
+    image_path = sys.argv[1]
+    result = run_prediction(image_path)
+
     print("---JSON_START---")
-    print(json.dumps(result))
+    print(json.dumps(result, ensure_ascii=False))
     print("---JSON_END---")
