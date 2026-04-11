@@ -16,9 +16,9 @@ def main():
         from Foodimg2Ing import app
         print("Step 3: Package loaded successfully.", flush=True)
 
-        # Use environment PORT if available, fallback to 5000
-        port = int(os.environ.get("PORT", 5000))
-        print(f"Step 4: Starting Flask server on 0.0.0.0:{port}...", flush=True)
+        # Force use internal port 5000 to avoid conflict with Next.js on 7860
+        port = 5000
+        print(f"Step 4: Starting Flask server on 127.0.0.1:{port}...", flush=True)
         
         # Bind specifically to 127.0.0.1 (IPv4) for intra-container stability
         app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
