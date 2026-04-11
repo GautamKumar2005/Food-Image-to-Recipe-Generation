@@ -26,37 +26,33 @@ def run_prediction(image_path):
         from Foodimg2Ing.output import output
         title, ingredients, recipe = output(image_path, data_dir=data_dir)
 
-        # Collect ALL valid recipe predictions
-        recipes = []
+        # Pick the first valid result
+        result_title = "Unknown Dish"
+        result_ingredients = []
+        result_recipe = []
 
         for i in range(len(title)):
             t = title[i] if i < len(title) else ""
             ing = ingredients[i] if i < len(ingredients) else []
             rec = recipe[i] if i < len(recipe) else []
 
+            # Skip clearly invalid results
             if t and "Not a valid" not in t and "Error" not in t and len(ing) > 0:
-                recipes.append({
-                    "title": t,
-                    "ingredients": ing if isinstance(ing, list) else list(ing),
-                    "recipe": rec if isinstance(rec, list) else [rec],
-                })
+                result_title = t
+                result_ingredients = ing if isinstance(ing, list) else list(ing)
+                result_recipe = rec if isinstance(rec, list) else [rec]
+                break
 
-        # Fallback: include first result even if marked invalid
-        if len(recipes) == 0 and len(title) > 0:
-            recipes.append({
-                "title": title[0] if title[0] else "Unknown Dish",
-                "ingredients": list(ingredients[0]) if ingredients else [],
-                "recipe": list(recipe[0]) if isinstance(recipe[0], list) else ([recipe[0]] if recipe else []),
-            })
-
-        # Primary result is the first (most confident) prediction
-        primary = recipes[0] if recipes else {"title": "Unknown Dish", "ingredients": [], "recipe": []}
+        # Fallback: use first result regardless
+        if result_title == "Unknown Dish" and len(title) > 0:
+            result_title = title[0] if title[0] else "Unknown Dish"
+            result_ingredients = list(ingredients[0]) if ingredients else []
+            result_recipe = list(recipe[0]) if isinstance(recipe[0], list) else [recipe[0]] if recipe else []
 
         return {
-            "title": primary["title"],
-            "ingredients": primary["ingredients"],
-            "recipe": primary["recipe"],
-            "recipes": recipes,          # all predictions as an array
+            "title": result_title,
+            "ingredients": result_ingredients,
+            "recipe": result_recipe,
         }
 
     except Exception as e:

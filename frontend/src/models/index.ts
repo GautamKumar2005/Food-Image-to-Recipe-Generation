@@ -1,17 +1,10 @@
 import mongoose from "mongoose";
 
-const RecipeVariantSchema = new mongoose.Schema({
-  title: String,
-  ingredients: [String],
-  recipe: [String],
-}, { _id: false });
-
 const SearchHistorySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   title: String,
   ingredients: [String],
   recipe: [String],
-  recipes: [RecipeVariantSchema],   // ← all model predictions
   imageUrl: String,
   createdAt: { type: Date, default: Date.now },
 });

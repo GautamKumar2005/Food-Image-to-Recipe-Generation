@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, ingredients, recipe, recipes, imageUrl } = await req.json();
+    const { title, ingredients, recipe, imageUrl } = await req.json();
     await dbConnect();
     
     const newHistory = await SearchHistory.create({
@@ -19,7 +19,6 @@ export async function POST(req: Request) {
       title,
       ingredients,
       recipe,
-      recipes: recipes || [],
       imageUrl,
     });
 
