@@ -13,12 +13,12 @@ echo "🍴 Starting CuisineAI Flask Backend (ML Engine)..."
 echo "--------------------------------------------------------"
 # BIND to 0.0.0.0:5000 so it's accessible internally by the Frontend
 export PORT=5000
-python start_app.py &
+python -u start_app.py &
 BACKEND_PID=$!
 
-# 2. Give the model enough time to load (PyTorch models on CPU take 30-45s)
-echo "⏳ Waiting for ML engine to initialize (approx 35s)..."
-sleep 35
+# 2. Give the model enough time to load (PyTorch models on CPU take 45-60s)
+echo "⏳ Waiting for ML engine to initialize (approx 60s)..."
+sleep 60
 
 # 3. Start the Next.js Frontend in the foreground
 echo "--------------------------------------------------------"

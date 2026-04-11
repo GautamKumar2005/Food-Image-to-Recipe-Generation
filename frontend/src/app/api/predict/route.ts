@@ -13,7 +13,22 @@ export async function POST(req: NextRequest) {
         // Use localhost for more stable internal communication
         const flaskBackendUrl = "http://localhost:5000/api/predict_json";
         
-        console.log(`[Next.js BRIDGE] Forwarding request to ${flaskBackendUrl}...`);
+        // 1. Pre-flight health check to ensure backend is ready
+        try {
+            const healthCheck = await fetch("http://localhost:5000/api/health", { signal: AbortSignal.timeout(5000) });
+            if (!healthCheck.ok) {
+                return NextResponse.json(
+                    { error: "AI Engine is still warming up. Please try again in 30 seconds." }, 
+                    { status: 503 }
+                );
+            }
+        } catch (hErr) {
+            console.warn("[Next.js BRIDGE] Health check failed, backend likely still loading.");
+            return NextResponse.json(
+                { error: "AI Engine is initializing. Please wait a moment and try again." }, 
+                { status: 503 }
+            );
+        }
 
         const backendFormData = new FormData();
         backendFormData.append("imagefile", imageFile);
