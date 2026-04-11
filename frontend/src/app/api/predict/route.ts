@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Forward the request to the high-performance Flask backend
-        // In the integrated Docker container, Flask runs on 127.0.0.1:5000
-        const flaskBackendUrl = "http://127.0.0.1:5000/api/predict_json";
+        // Use localhost for more stable internal communication
+        const flaskBackendUrl = "http://localhost:5000/api/predict_json";
         
         console.log(`[Next.js BRIDGE] Forwarding request to ${flaskBackendUrl}...`);
 

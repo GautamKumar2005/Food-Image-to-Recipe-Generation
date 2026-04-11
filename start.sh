@@ -1,3 +1,6 @@
+# Ensure we are in the project root
+cd /app
+
 # 0. Download the ML model if missing
 echo "--------------------------------------------------------"
 echo "📦 Checking for ML Model Weights..."
@@ -8,7 +11,7 @@ python download_model.py
 echo "--------------------------------------------------------"
 echo "🍴 Starting CuisineAI Flask Backend (ML Engine)..."
 echo "--------------------------------------------------------"
-# BIND to 127.0.0.1:5000 so it's only accessible internally by the Frontend
+# BIND to 0.0.0.0:5000 so it's accessible internally by the Frontend
 export PORT=5000
 python start_app.py &
 BACKEND_PID=$!
