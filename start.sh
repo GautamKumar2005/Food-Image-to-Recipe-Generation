@@ -9,11 +9,10 @@ python download_model.py
 
 # 1. Start the Flask Backend in the background
 echo "--------------------------------------------------------"
-echo "🍴 Starting CuisineAI Flask Backend (ML Engine)..."
-echo "--------------------------------------------------------"
-# BIND to 0.0.0.0:5000 so it's accessible internally by the Frontend
-export PORT=5000
-python -u start_app.py > backend.log 2>&1 &
+# Ensure Python can find the Foodimg2Ing package
+export PYTHONPATH=$PYTHONPATH:/app
+# Start Flask bound specifically to 127.0.0.1 (IPv4) for bridge stability
+python -u start_app.py &
 BACKEND_PID=$!
 
 # 2. Give the model enough time to load (PyTorch models on CPU take 45-60s)

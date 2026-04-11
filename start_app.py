@@ -20,9 +20,8 @@ def main():
         port = int(os.environ.get("PORT", 5000))
         print(f"Step 4: Starting Flask server on 0.0.0.0:{port}...", flush=True)
         
-        # Bind to all interfaces (0.0.0.0) for cloud deployment
-        # Disable debug mode for production to save memory
-        app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
+        # Bind specifically to 127.0.0.1 (IPv4) for intra-container stability
+        app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
         
     except ImportError as e:
         print(f"Error: Could not import Foodimg2Ing package. {e}")

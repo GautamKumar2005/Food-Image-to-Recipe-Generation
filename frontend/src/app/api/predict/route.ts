@@ -9,13 +9,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No image file provided" }, { status: 400 });
         }
 
-        // 1. Forward the request to the high-performance Flask backend
-        // Use localhost for more stable internal communication
-        const flaskBackendUrl = "http://localhost:5000/api/predict_json";
+        // 1. Forward the request to the high-performance Flask backend (Strict IPv4)
+        const flaskBackendUrl = "http://127.0.0.1:5000/api/predict_json";
         
-        // 1. Pre-flight health check to ensure backend is ready
+        // 1. Pre-flight health check to ensure backend is ready (Strict IPv4)
         try {
-            const healthCheck = await fetch("http://localhost:5000/api/health", { signal: AbortSignal.timeout(5000) });
+            const healthCheck = await fetch("http://127.0.0.1:5000/api/health", { signal: AbortSignal.timeout(5000) });
             if (!healthCheck.ok) {
                 return NextResponse.json(
                     { error: "AI Engine is still warming up. Please try again in 30 seconds." }, 
