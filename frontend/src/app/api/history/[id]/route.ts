@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import History from "@/models/History";
+import { getServerSession } from "next-auth";
+import dbConnect from "../../../../lib/mongodb";
+import { authOptions } from "../auth/[...nextauth]/route";
+import History from "../../../../models/History";
 
 export async function GET(
   req: NextRequest,
