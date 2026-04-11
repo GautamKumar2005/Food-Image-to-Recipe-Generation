@@ -1,52 +1,46 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import dbConnect from "@/lib/dbConnect";
-import { SearchHistory } from "@/models";
-import { authOptions } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import History from "@/models/History";
 
-export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { id } = params;
 
     await dbConnect();
-    const historyItem = await SearchHistory.findOne({ 
-        _id: params.id, 
-        userId: (session.user as any).id 
-    });
 
-    if (!historyItem) {
-      return NextResponse.json({ error: "History item not found" }, { status: 404 });
+    const entry = await History.findById(id);
+
+    if (!entry) {
+      return NextResponse.json({ error: "Record not found" }, { status: 404 });
     }
 
-    await SearchHistory.deleteOne({ _id: params.id });
+    // Note: If you want history to be private, add session check here.
+    // However, the Dashboard code currently uses this for SHARING,
+    // which implies entries are public via their ID.
 
-    return NextResponse.json({ message: "History item deleted" });
+    return NextResponse.json(entry);
   } catch (error: any) {
+    console.error("[HISTORY_SINGLE_GET_ERROR]", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
-export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-    try {
-      // Removing session check to allow public 'Sharable Links'
-      await dbConnect();
-      const historyItem = await SearchHistory.findOne({ _id: params.id });
-  
-      if (!historyItem) {
-        return NextResponse.json({ error: "History item not found" }, { status: 404 });
-      }
-  
-      return NextResponse.json(historyItem);
-    } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  try {
+    const { id } = params;
+    await dbConnect();
+    
+    // Optional: Add session check to ensure user owns this record
+    await History.findByIdAndDelete(id);
+
+    return NextResponse.json({ message: "Record deleted" });
+  } catch (error: any) {
+    console.error("[HISTORY_DELETE_ERROR]", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+}

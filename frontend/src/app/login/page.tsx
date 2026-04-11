@@ -103,6 +103,7 @@ export default function AuthPage() {
                   required
                   className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-transparent focus:border-orange-500/50 focus:bg-white rounded-2xl outline-none transition-all font-semibold"
                   value={formData.name}
+                  suppressHydrationWarning
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </motion.div>
@@ -119,6 +120,7 @@ export default function AuthPage() {
               required
               className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-transparent focus:border-orange-500/50 focus:bg-white rounded-2xl outline-none transition-all font-semibold"
               value={formData.email}
+              suppressHydrationWarning
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
@@ -133,6 +135,7 @@ export default function AuthPage() {
               required
               className="w-full pl-12 pr-14 py-4 bg-slate-50 border border-transparent focus:border-orange-500/50 focus:bg-white rounded-2xl outline-none transition-all font-semibold"
               value={formData.password}
+              suppressHydrationWarning
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
             <button

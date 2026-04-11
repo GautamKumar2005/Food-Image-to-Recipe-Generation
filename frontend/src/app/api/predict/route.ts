@@ -1,10 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
-import path from "path";
-import fs from "fs";
-import { promisify } from "util";
-
-const writeFile = promisify(fs.writeFile);
 
 export async function POST(req: NextRequest) {
     try {
@@ -15,85 +9,51 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No image file provided" }, { status: 400 });
         }
 
-        // 1. Setup paths
-        // Use absolute paths for Docker stability
-        const isDocker = process.env.NODE_ENV === "production";
-        const rootDir = isDocker ? "/app" : path.resolve(process.cwd(), "..");
-        const tempDir = path.join(rootDir, "temp_uploads");
+        // 1. Forward the request to the high-performance Flask backend
+        // In the integrated Docker container, Flask runs on 127.0.0.1:5000
+        const flaskBackendUrl = "http://127.0.0.1:5000/api/predict_json";
         
-        if (!fs.existsSync(tempDir)) {
-            try { fs.mkdirSync(tempDir, { recursive: true }); } catch (e) {}
-        }
+        console.log(`[Next.js BRIDGE] Forwarding request to ${flaskBackendUrl}...`);
 
-        const tempFilePath = path.join(tempDir, `${Date.now()}_${imageFile.name}`);
-        
-        // 2. Save the uploaded file temporarily so Python can read it
-        const arrayBuffer = await imageFile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        await writeFile(tempFilePath, buffer);
+        const backendFormData = new FormData();
+        backendFormData.append("imagefile", imageFile);
 
-        // 3. Spawn Python process using the bridge script
-        const responseData = await new Promise<NextResponse>((resolve) => {
-            const pythonCmd = process.platform === "win32" ? "python" : "python3";
-            const bridgeScript = path.join(rootDir, "predict_bridge.py");
-
-            console.log(`[Next.js BRIDGE] Running ${pythonCmd} on ${bridgeScript}`);
-            
-            const pythonProcess = spawn(pythonCmd, [bridgeScript, tempFilePath]);
-
-            let result = "";
-            let errorArr = "";
-
-            pythonProcess.stdout.on("data", (data) => {
-                result += data.toString();
-            });
-
-            pythonProcess.stderr.on("data", (data) => {
-                errorArr += data.toString();
-            });
-
-            pythonProcess.on("close", (code) => {
-                if (code !== 0) {
-                    console.error("[Next.js BRIDGE] Python Error Exit Code:", code);
-                    console.error("[Next.js BRIDGE] ERR:", errorArr);
-                    resolve(NextResponse.json({ error: "Failed to process image", details: errorArr }, { status: 500 }));
-                    return;
-                }
-
-                try {
-                    // Search for JSON block between markers
-                    const jsonMatch = result.match(/---JSON_START---([\s\S]*?)---JSON_END---/);
-                    const finalResult = jsonMatch ? jsonMatch[1].trim() : result.trim();
-                    
-                    const parsedData = JSON.parse(finalResult);
-                    if (parsedData.error) {
-                        console.error("[Next.js BRIDGE] Logic Error:", parsedData.error);
-                        resolve(NextResponse.json({ error: parsedData.error, details: parsedData.traceback }, { status: 500 }));
-                    } else {
-                        // Convert image to Base64 so it persists in MongoDB
-                        // (temp_uploads is ephemeral on Hugging Face)
-                        try {
-                            const imageBuffer = fs.readFileSync(tempFilePath);
-                            const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-                            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
-                            const base64Image = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
-                            parsedData.imageUrl = base64Image;
-                        } catch (imgErr) {
-                            console.warn("[Next.js BRIDGE] Could not encode image to base64:", imgErr);
-                        }
-                        resolve(NextResponse.json(parsedData));
-                    }
-                } catch (e) {
-                    console.error("[Next.js BRIDGE] Parse Error:", e);
-                    resolve(NextResponse.json({ error: "Invalid response from AI engine" }, { status: 500 }));
-                }
-            });
+        const response = await fetch(flaskBackendUrl, {
+            method: "POST",
+            body: backendFormData,
         });
 
-        return responseData;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("[Next.js BRIDGE] Flask backend error:", errorText);
+            return NextResponse.json(
+                { error: "Backend prediction failed", details: errorText }, 
+                { status: response.status }
+            );
+        }
+
+        const parsedData = await response.json();
+
+        // 2. Post-process: Convert image to Base64 for session persistence/UI display
+        // (Maintaining the exact output configuration as requested)
+        try {
+            const arrayBuffer = await imageFile.arrayBuffer();
+            const imageBuffer = Buffer.from(arrayBuffer);
+            const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+            const base64Image = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
+            parsedData.imageUrl = base64Image;
+        } catch (imgErr) {
+            console.warn("[Next.js BRIDGE] Could not encode image to base64:", imgErr);
+        }
+
+        return NextResponse.json(parsedData);
 
     } catch (error: any) {
         console.error("[Next.js BRIDGE] Global Bridge Error:", error);
-        return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
+        return NextResponse.json(
+            { error: "Internal Server Error", details: error.message }, 
+            { status: 500 }
+        );
     }
 }

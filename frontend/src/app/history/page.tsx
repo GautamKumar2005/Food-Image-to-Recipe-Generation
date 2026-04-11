@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Utensils, Calendar, ChevronRight, ArrowLeft, Loader2, SearchX, Github, Linkedin, X, Share2, Check, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HistoryPage() {
   const { data: session, status } = useSession();
@@ -78,11 +79,14 @@ export default function HistoryPage() {
                 className="group relative bg-white rounded-3xl overflow-hidden shadow-lg shadow-slate-200/40 border border-slate-100 flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300"
               >
                 <div className="aspect-[16/10] relative overflow-hidden">
-                  <img 
-                    src={item.imageUrl} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
+                  {item.imageUrl && (
+                    <Image 
+                      src={item.imageUrl} 
+                      alt={item.title} 
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
+                  )}
                   <div className="absolute top-3 left-3 bg-orange-500 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/30">
                     Recipe
                   </div>
@@ -104,7 +108,7 @@ export default function HistoryPage() {
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black mb-2 uppercase tracking-widest opacity-60">
                     <Calendar className="w-3 h-3" />
-                    {new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recently'}
                   </div>
                   
                   <h3 className="text-xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-orange-500 transition-colors">{item.title}</h3>

@@ -64,5 +64,6 @@ ENV NODE_ENV=production
 RUN chown -R node:node /app
 USER node
 
-# Start the Next.js server
-CMD ["npm", "start"]
+# 9. Start the integrated services
+RUN chmod +x /app/start.sh
+CMD ["/app/start.sh"]

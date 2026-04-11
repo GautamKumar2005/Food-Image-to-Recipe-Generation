@@ -1,24 +1,46 @@
-# Large model files
-*.ckpt
-*.pt
-*.pth
+# Next.js
+.next/
+out/
+build/
+node_modules/
 
-# Node modules
-frontend/node_modules/
-
-# Env files
+# Environment Variables (IMPORTANT: Do NOT upload these to HF via Git)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# CuisineAI specific
+temp_uploads/
+static/images/demo_imgs/
+Foodimg2Ing/Templates/
+Foodimg2Ing/Static/
+Foodimg2Ing/data/*.ckpt
 
 # OS files
 .DS_Store
 Thumbs.db
-
-frontend/.next/
-.next/
-node_modules/
-frontend/node_modules/
-

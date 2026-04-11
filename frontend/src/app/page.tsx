@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 function Dashboard() {
   const { data: session } = useSession();
@@ -280,7 +281,9 @@ function Dashboard() {
               <div className="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200/80 bg-slate-50 transition-colors hover:border-orange-500/50">
                 <div className={`aspect-[4/3] flex flex-col items-center justify-center`}>
                     {preview ? (
-                        <img src={preview} className="w-full h-full object-cover" alt="Preview"/>
+                        <div className="relative w-full h-full">
+                           <Image src={preview} fill className="object-cover" alt="Preview"/>
+                        </div>
                     ) : (
                         <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full p-4 text-center">
                             <Upload className="w-10 h-10 text-slate-300 mb-3 group-hover:text-orange-500 animate-bounce transition-colors"/>
@@ -433,10 +436,12 @@ function Dashboard() {
   );
 }
 
-export default function Home() {
+export function Home() {
     return (
         <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center font-black text-orange-500 tracking-widest uppercase text-xs animate-pulse">CuisineAI Is Loading...</div>}>
             <Dashboard />
         </Suspense>
     )
 }
+
+export default Home;
