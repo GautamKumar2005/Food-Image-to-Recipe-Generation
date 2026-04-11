@@ -18,6 +18,10 @@ __pycache__/
 *.so
 .Python
 env/
+# Re-allowing src/lib for Next.js
+!frontend/src/lib/
+!frontend/src/models/
+!frontend/src/components/
 build/
 develop-eggs/
 dist/
