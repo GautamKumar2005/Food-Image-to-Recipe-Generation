@@ -11,6 +11,16 @@ CORS(app) # Enable CORS for all routes
 def health():
     return jsonify({"status": "healthy", "service": "CuisineAI ML Engine"}), 200
 
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    try:
+        if os.path.exists('backend.log'):
+            with open('backend.log', 'r') as f:
+                return f.read()[-5000:]
+        return "No backend.log found."
+    except Exception as e:
+        return str(e)
+
 @app.route('/api/predict_json', methods=['POST'])
 def predict_json():
     try:

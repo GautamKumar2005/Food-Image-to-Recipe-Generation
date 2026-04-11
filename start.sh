@@ -13,7 +13,7 @@ echo "🍴 Starting CuisineAI Flask Backend (ML Engine)..."
 echo "--------------------------------------------------------"
 # BIND to 0.0.0.0:5000 so it's accessible internally by the Frontend
 export PORT=5000
-python -u start_app.py &
+python -u start_app.py > backend.log 2>&1 &
 BACKEND_PID=$!
 
 # 2. Give the model enough time to load (PyTorch models on CPU take 45-60s)

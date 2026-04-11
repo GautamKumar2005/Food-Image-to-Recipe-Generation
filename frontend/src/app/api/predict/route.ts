@@ -66,8 +66,20 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("[Next.js BRIDGE] Global Bridge Error:", error);
+        
+        // Final attempt: try to fetch backend logs to explain the failure
+        let logs = "Could not retrieve backend logs.";
+        try {
+            const logsRes = await fetch("http://localhost:5000/api/logs", { signal: AbortSignal.timeout(2000) });
+            if (logsRes.ok) logs = await logsRes.text();
+        } catch (lErr) {}
+
         return NextResponse.json(
-            { error: "Internal Server Error", details: error.message }, 
+            { 
+                error: "Internal Server Error", 
+                details: error.message,
+                backendLogs: logs 
+            }, 
             { status: 500 }
         );
     }
