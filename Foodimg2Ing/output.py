@@ -93,9 +93,9 @@ def output(uploadedfile, data_dir=None):
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
     ])
 
-    # Only use greedy mode — single pass, faster, reliable
-    greedy = [True]
-    beam = [-1]
+    # Use greedy + beam search to generate multiple recipe predictions
+    greedy = [True, False, False]
+    beam = [-1, 3, 5]
     temperature = 1.0
 
     # Validate the input file
