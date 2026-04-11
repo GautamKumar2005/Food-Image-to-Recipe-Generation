@@ -7,7 +7,7 @@ import pickle
 import time
 from torchvision import transforms
 from PIL import Image
-from tensorflow.keras.preprocessing import image
+# TensorFlow import removed (unnecessary dependency)
 
 from Foodimg2Ing.args import get_parser
 from Foodimg2Ing.model import get_model
@@ -104,7 +104,7 @@ def output(uploadedfile):
     temperature = 1.0
     numgens = len(greedy)
 
-    img = image.load_img(uploadedfile)
+    img = Image.open(uploadedfile).convert('RGB')
     show_anyways = False 
     
     image_transf = transform(img)
