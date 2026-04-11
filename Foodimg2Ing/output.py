@@ -12,7 +12,7 @@ from PIL import Image
 from Foodimg2Ing.args import get_parser
 from Foodimg2Ing.model import get_model
 from Foodimg2Ing.utils.output_utils import prepare_output
-from Foodimg2Ing import app
+# Circular import removed: from Foodimg2Ing import app
 
 # --- MODEL CACHING ---
 # We load the model and vocabs once at the module level for performance.
@@ -31,7 +31,9 @@ def load_predictor():
         return _predictor_state
 
     print("Loading AI Model and Vocabularies into memory...", flush=True)
-    data_dir = os.path.join(app.root_path, 'data')
+    # Use direct path to reach the data folder without depending on the Flask 'app' object
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(current_dir, 'data')
     
     # Setup device
     use_gpu = True
@@ -136,6 +138,5 @@ def output(uploadedfile):
             recipe.append(outs['recipe'])
         else:
             title.append("Not a valid recipe!")
-            recipe.append("Reason: " + valid['reason'])
             
     return title, ingredients, recipe
