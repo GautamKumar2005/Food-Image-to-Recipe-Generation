@@ -23,9 +23,18 @@ export async function POST(req: NextRequest) {
                 );
             }
         } catch (hErr) {
-            console.warn("[Next.js BRIDGE] Health check failed, backend likely still loading.");
+            console.warn("[Next.js BRIDGE] Health check failed, fetching boot logs...");
+            let bootLogs = "No logs available.";
+            try {
+                const logsRes = await fetch("http://localhost:5000/api/logs", { signal: AbortSignal.timeout(2000) });
+                if (logsRes.ok) bootLogs = await logsRes.text();
+            } catch (lErr) {}
+
             return NextResponse.json(
-                { error: "AI Engine is initializing. Please wait a moment and try again." }, 
+                { 
+                    error: "AI Engine is initializing. Please wait a moment and try again.",
+                    backendLogs: bootLogs 
+                }, 
                 { status: 503 }
             );
         }
