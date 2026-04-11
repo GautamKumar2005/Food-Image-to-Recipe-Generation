@@ -163,6 +163,7 @@ function Dashboard() {
     try {
       const res = await axios.post("/api/predict", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 180000 // 3 minutes for slow CPU inference
       });
 
       if (session) {

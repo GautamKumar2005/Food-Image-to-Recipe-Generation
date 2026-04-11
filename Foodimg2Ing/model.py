@@ -239,7 +239,10 @@ class InverseCookingModel(nn.Module):
         ids, probs = self.recipe_decoder.sample(input_feats, input_mask, greedy, temperature, beam, img_features, 0,
                                                 last_token_value=1)
 
-        outputs['recipe_probs'] = probs.data
+        if hasattr(probs, 'data'):
+            outputs['recipe_probs'] = probs.data
+        else:
+            outputs['recipe_probs'] = probs
         outputs['recipe_ids'] = ids
 
         return outputs
