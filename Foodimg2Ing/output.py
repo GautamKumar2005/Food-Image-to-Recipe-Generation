@@ -106,31 +106,62 @@ def output(uploadedfile, data_dir=None):
     try:
         img = Image.open(uploadedfile).convert('RGB')
         print(f"🖼️  Image loaded: {uploadedfile}", flush=True)
+        
+        # ── Pre-Filterisation & Enhancement for Best Accuracy ─────────
+        from PIL import ImageEnhance
+        # 1. Enhance Color slightly to make ingredients pop
+        color_enhancer = ImageEnhance.Color(img)
+        img = color_enhancer.enhance(1.15)
+        
+        # 2. Enhance Contrast slightly to differentiate textures
+        contrast_enhancer = ImageEnhance.Contrast(img)
+        img = contrast_enhancer.enhance(1.1)
+        
+        # 3. Increase Sharpness for clear edges (better feature extraction)
+        sharpness_enhancer = ImageEnhance.Sharpness(img)
+        img = sharpness_enhancer.enhance(1.25)
+        
+        print("✨ Applied image filterisation for optimal model accuracy.", flush=True)
     except Exception as e:
         return ["Invalid Image!"], [], [f"Could not read image: {e}"]
 
-    # Use Bicubic interpolation for higher quality image downsampling
-    transform = transforms.Compose([
-        transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.BICUBIC)
-    ])
-    image_transf = transform(img)
+    # ── Aspect-Ratio Preserving Resize with Padding ──────────────────
+    # This prevents the food from looking "squashed" or "stretched"
+    # and ensures the model sees the entire photo.
+    def pad_resize(image, size=224):
+        w, h = image.size
+        # Resize longest side to 'size'
+        if w > h:
+            new_w, new_h = size, int(h * size / w)
+        else:
+            new_w, new_h = int(w * size / h), size
+        
+        image = image.resize((new_w, new_h), Image.BICUBIC)
+        # Pad to make it square
+        new_img = Image.new("RGB", (size, size), (0, 0, 0))
+        new_img.paste(image, ((size - new_w) // 2, (size - new_h) // 2))
+        return new_img
+
+    image_transf = pad_resize(img, 224)
     image_tensor = to_input_transf(image_transf).unsqueeze(0).to(device)
 
     title = []
     ingredients = []
     recipe = []
 
-    show_anyways = False  # Filter out low-quality/repetitive results
+    show_anyways = False  # Only keep "Best of Best" quality
 
-    # Variant temperatures: 1st is stable, 2nd is more diverse
-    temperatures = [1.0, 1.2]
+    # We use high-quality Beam search for the variants
+    greedy = [True, False]
+    beam = [-1, 5] 
+    temperatures = [1.0, 1.0]
     
     for i in range(len(greedy)):
         with torch.no_grad():
             outputs = model.sample(
                 image_tensor,
                 greedy=greedy[i],
-                temperature=temperatures[i] if i < len(temperatures) else 1.0,
+                temperature=temperatures[i],
                 beam=beam[i],
                 true_ingrs=None
             )
@@ -140,21 +171,18 @@ def output(uploadedfile, data_dir=None):
 
         outs, valid = prepare_output(recipe_ids[0], ingr_ids[0], ingrs_vocab, vocab)
 
-        if valid['is_valid'] or show_anyways:
-            # Only add if it's a unique title to avoid duplicate variants
+        if valid['is_valid']:
+            # Prevent exact duplicate titles
             if outs['title'] not in title:
                 title.append(outs['title'])
                 ingredients.append(outs['ingrs'])
                 recipe.append(outs['recipe'])
-        else:
-            # If primary result is invalid, we add it with a warning
-            if i == 0:
-                title.append(outs['title'] + " (Low Confidence)")
-                ingredients.append(outs['ingrs'])
-                recipe.append(outs['recipe'])
-            else:
-                # For variants, if they are bad, we just don't add them
-                pass 
+        elif i == 0:
+            # If even the best result is "invalid" but technically complete, 
+            # we show it as a fallback but skip the 2nd variant.
+            title.append(outs['title'])
+            ingredients.append(outs['ingrs'])
+            recipe.append(outs['recipe'])
 
     print(f"🍽️  Prediction done: {title}", flush=True)
     return title, ingredients, recipe
