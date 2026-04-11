@@ -13,9 +13,9 @@ export PORT=5000
 python start_app.py &
 BACKEND_PID=$!
 
-# 2. Give the model some time to load (PyTorch models are heavy)
-echo "⏳ Waiting for ML model to load (approx 15s)..."
-sleep 15
+# 2. Give the model enough time to load (PyTorch models on CPU take 30-45s)
+echo "⏳ Waiting for ML engine to initialize (approx 35s)..."
+sleep 35
 
 # 3. Start the Next.js Frontend in the foreground
 echo "--------------------------------------------------------"

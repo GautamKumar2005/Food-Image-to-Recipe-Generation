@@ -7,6 +7,10 @@ import traceback
 app = Flask(__name__)
 CORS(app) # Enable CORS for all routes
 
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy", "service": "CuisineAI ML Engine"}), 200
+
 @app.route('/api/predict_json', methods=['POST'])
 def predict_json():
     try:

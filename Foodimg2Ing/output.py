@@ -57,8 +57,14 @@ def load_predictor():
     model = get_model(args, ingr_vocab_size, instrs_vocab_size)
    
     # Load pre-trained weights
-    model_path = os.path.join(data_dir, 'modelbest.ckpt')
-    model.load_state_dict(torch.load(model_path, map_location=map_loc))
+    try:
+        model_path = os.path.join(data_dir, 'modelbest.ckpt')
+        if not os.path.exists(model_path):
+             raise FileNotFoundError(f"Model checkpoint not found at {model_path}")
+        model.load_state_dict(torch.load(model_path, map_location=map_loc))
+    except Exception as e:
+        print(f"CRITICAL ERROR LOADING MODEL: {e}", flush=True)
+        raise e
     model.to(device)
     model.eval()
     model.ingrs_only = False
