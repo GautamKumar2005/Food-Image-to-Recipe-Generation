@@ -464,67 +464,74 @@ function Dashboard() {
                   )}
 
                   {/* ── Content ── */}
-                  <div className="grid md:grid-cols-12 gap-8">
-                    {/* Ingredients */}
-                    <div className="md:col-span-4 space-y-4">
-                      <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Ingredients</h4>
-                      <div className="flex flex-wrap md:flex-col gap-2">
-                        {(Array.isArray(activeRecipe.ingredients) ? activeRecipe.ingredients : []).map((item: string, i: number) => (
-                          <div key={i} className="text-slate-600 text-xs font-bold px-3 py-2.5 bg-slate-50 rounded-2xl flex items-center gap-2.5 group transition-colors hover:bg-orange-50">
-                            <div className="w-5 h-5 rounded-lg bg-orange-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</div>
-                            {item}
+                  {activeRecipe.title !== "Not a valid recipe!" && !activeRecipe.title.includes("Low Confidence") ? (
+                      <div className="grid md:grid-cols-12 gap-8">
+                        {/* Ingredients */}
+                        <div className="md:col-span-4 space-y-4">
+                          <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Ingredients</h4>
+                          <div className="flex flex-wrap md:flex-col gap-2">
+                            {(Array.isArray(activeRecipe.ingredients) ? activeRecipe.ingredients : []).map((item: string, i: number) => (
+                              <div key={i} className="text-slate-600 text-xs font-bold px-3 py-2.5 bg-slate-50 rounded-2xl flex items-center gap-2.5 group transition-colors hover:bg-orange-50">
+                                <div className="w-5 h-5 rounded-lg bg-orange-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</div>
+                                {item}
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    {/* Steps */}
-                    <div className="md:col-span-8 space-y-6">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Preparation Steps</h4>
-                        <div className="flex items-center gap-2">
-                          {result._id && (
-                            <button
-                              id="share-btn"
-                              onClick={() => copyShareLink(result._id!)}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isCopied ? "bg-green-500 text-white shadow-xl shadow-green-500/30" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
-                            >
-                              {isCopied ? <Check className="w-3 h-3" /> : <Share2 className="w-3 h-3" />}
-                              {isCopied ? "Copied" : "Share"}
-                            </button>
-                          )}
-                          <button
-                            id="listen-btn"
-                            onClick={isSpeaking ? stopVoiceAssistant : startAutomatedGuide}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isSpeaking ? "bg-orange-500 text-white shadow-xl shadow-orange-500/30" : "bg-slate-900 text-white hover:bg-orange-500"}`}
-                          >
-                            {isSpeaking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-white" />}
-                            {isSpeaking ? "Stop" : "Listen"}
-                          </button>
+                        {/* Steps */}
+                        <div className="md:col-span-8 space-y-6">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Preparation Steps</h4>
+                            <div className="flex items-center gap-2">
+                              {result._id && (
+                                <button
+                                  id="share-btn"
+                                  onClick={() => copyShareLink(result._id!)}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isCopied ? "bg-green-500 text-white shadow-xl shadow-green-500/30" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                                >
+                                  {isCopied ? <Check className="w-3 h-3" /> : <Share2 className="w-3 h-3" />}
+                                  {isCopied ? "Copied" : "Share"}
+                                </button>
+                              )}
+                              <button
+                                id="listen-btn"
+                                onClick={isSpeaking ? stopVoiceAssistant : startAutomatedGuide}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isSpeaking ? "bg-orange-500 text-white shadow-xl shadow-orange-500/30" : "bg-slate-900 text-white hover:bg-orange-500"}`}
+                              >
+                                {isSpeaking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-white" />}
+                                {isSpeaking ? "Stop" : "Listen"}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {(Array.isArray(activeRecipe.recipe) ? activeRecipe.recipe : []).map((step: string, i: number) => (
+                              <div
+                                key={i}
+                                onClick={() => speakStep(i)}
+                                className={`flex gap-4 p-5 rounded-[1.5rem] border transition-all cursor-pointer group ${currentStepIndex === i
+                                  ? "bg-orange-50 border-orange-500 ring-4 ring-orange-500/10"
+                                  : "bg-white border-slate-100 hover:border-orange-500/50 shadow-sm"
+                                  }`}
+                              >
+                                <div className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs ${currentStepIndex === i ? "bg-orange-500 text-white shadow-lg" : "bg-slate-100 text-slate-400 group-hover:bg-orange-500 group-hover:text-white"}`}>
+                                  {i + 1}
+                                </div>
+                                <p className={`text-sm leading-relaxed font-bold ${currentStepIndex === i ? "text-orange-950 underline decoration-orange-500/30 underline-offset-4" : "text-slate-600 group-hover:text-slate-900"}`}>
+                                  {step}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-
-                      <div className="space-y-3">
-                        {(Array.isArray(activeRecipe.recipe) ? activeRecipe.recipe : []).map((step: string, i: number) => (
-                          <div
-                            key={i}
-                            onClick={() => speakStep(i)}
-                            className={`flex gap-4 p-5 rounded-[1.5rem] border transition-all cursor-pointer group ${currentStepIndex === i
-                              ? "bg-orange-50 border-orange-500 ring-4 ring-orange-500/10"
-                              : "bg-white border-slate-100 hover:border-orange-500/50 shadow-sm"
-                              }`}
-                          >
-                            <div className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs ${currentStepIndex === i ? "bg-orange-500 text-white shadow-lg" : "bg-slate-100 text-slate-400 group-hover:bg-orange-500 group-hover:text-white"}`}>
-                              {i + 1}
-                            </div>
-                            <p className={`text-sm leading-relaxed font-bold ${currentStepIndex === i ? "text-orange-950 underline decoration-orange-500/30 underline-offset-4" : "text-slate-600 group-hover:text-slate-900"}`}>
-                              {step}
-                            </p>
-                          </div>
-                        ))}
+                  ) : (
+                      <div className="flex flex-col items-center justify-center p-8 bg-red-50 rounded-[2rem] border border-red-100/50 text-center">
+                          <p className="text-red-500 font-bold mb-2">{(Array.isArray(activeRecipe.recipe) ? activeRecipe.recipe[0] : activeRecipe.recipe) || "Cannot generate alternative recipe"}</p>
+                          <p className="text-slate-500 text-sm">Please check the other variant or try a different food image.</p>
                       </div>
-                    </div>
-                  </div>
+                  )}
                 </motion.div>
               ) : (
                 <div key="placeholder" className="h-full min-h-[400px] flex items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-[3rem] bg-white/40">
