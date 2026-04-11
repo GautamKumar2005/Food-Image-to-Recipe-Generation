@@ -109,10 +109,10 @@ def output(uploadedfile, data_dir=None):
     except Exception as e:
         return ["Invalid Image!"], [], [f"Could not read image: {e}"]
 
-    # Resize and crop for model input
+    # Use Resize to the exact size the model expects (224x224) 
+    # to ensure the full dish is visible (no cropping).
     transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224)
+        transforms.Resize((224, 224))
     ])
     image_transf = transform(img)
     image_tensor = to_input_transf(image_transf).unsqueeze(0).to(device)
@@ -123,12 +123,15 @@ def output(uploadedfile, data_dir=None):
 
     show_anyways = True  # Always return a result even if low confidence
 
+    # Variant temperatures: 1st is stable, 2nd is more diverse
+    temperatures = [1.0, 1.2]
+    
     for i in range(len(greedy)):
         with torch.no_grad():
             outputs = model.sample(
                 image_tensor,
                 greedy=greedy[i],
-                temperature=temperature,
+                temperature=temperatures[i] if i < len(temperatures) else 1.0,
                 beam=beam[i],
                 true_ingrs=None
             )

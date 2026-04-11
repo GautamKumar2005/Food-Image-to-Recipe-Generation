@@ -210,7 +210,7 @@ class InverseCookingModel(nn.Module):
         img_features = self.image_encoder(img_inputs)
 
         if not self.recipe_only:
-            ingr_ids, ingr_probs = self.ingredient_decoder.sample(None, None, greedy=True, temperature=temperature,
+            ingr_ids, ingr_probs = self.ingredient_decoder.sample(None, None, greedy=greedy, temperature=temperature,
                                                                   beam=-1,
                                                                   img_features=img_features, first_token_value=0,
                                                                   replacement=False)
