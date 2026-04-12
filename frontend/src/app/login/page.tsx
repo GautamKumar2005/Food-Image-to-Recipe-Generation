@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Utensils, Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 
 export default function AuthPage() {
+  const { data: session, status } = useSession();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -36,8 +43,9 @@ export default function AuthPage() {
         if (res?.error) {
           setError("Invalid email or password");
         } else {
-          router.push("/");
-          router.refresh();
+          // Use window.location.replace for a robust redirect that ensures 
+          // session cookies are properly picked up by the browser on HF.
+          window.location.replace("/");
         }
       } else {
         await axios.post("/api/register", formData);
@@ -69,7 +77,7 @@ export default function AuthPage() {
           <h1 className="text-3xl font-black tracking-tighter text-slate-900">
             {isLogin ? "Welcome Back" : "Create Account"}
           </h1>
-          <p className="text-slate-400 mt-2 font-medium">
+          <p className="text-slate-600 mt-2 font-medium">
             {isLogin ? "Continue your AI culinary journey" : "Join the world's most intelligent kitchen"}
           </p>
         </div>
@@ -94,7 +102,7 @@ export default function AuthPage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="relative"
               >
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
                   <User className="w-5 h-5"/>
                 </span>
                 <input
@@ -111,7 +119,7 @@ export default function AuthPage() {
           </AnimatePresence>
 
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
               <Mail className="w-5 h-5"/>
             </span>
             <input
@@ -126,7 +134,7 @@ export default function AuthPage() {
           </div>
 
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
               <Lock className="w-5 h-5"/>
             </span>
             <input
@@ -141,7 +149,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-500 transition-colors focus:outline-none"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-orange-500 transition-colors focus:outline-none"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
@@ -167,7 +175,7 @@ export default function AuthPage() {
         <div className="mt-8 text-center">
           <button
             onClick={() => { setIsLogin(!isLogin); setError(""); }}
-            className="text-slate-400 hover:text-orange-500 font-bold transition-all text-sm"
+            className="text-slate-600 hover:text-orange-500 font-bold transition-all text-sm"
           >
             {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
           </button>
