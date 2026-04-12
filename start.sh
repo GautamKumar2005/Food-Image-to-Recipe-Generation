@@ -1,7 +1,29 @@
 # Ensure we are in the project root
 cd /app
 
-# 0. Download the ML model if missing
+# 0. Runtime environment diagnostics (CRITICAL for debugging HF Spaces)
+echo "========================================================"
+echo "🔍 Runtime Environment Check"
+echo "========================================================"
+if [ -z "$NEXTAUTH_SECRET" ]; then
+  echo "❌ ERROR: NEXTAUTH_SECRET is NOT set! JWT will fail."
+  echo "   → Go to your HF Space Settings → Variables and Secrets → Add NEXTAUTH_SECRET"
+else
+  echo "✅ NEXTAUTH_SECRET is set (length: ${#NEXTAUTH_SECRET} chars)"
+fi
+if [ -z "$DATABASE_URL" ]; then
+  echo "❌ WARNING: DATABASE_URL is NOT set!"
+else
+  echo "✅ DATABASE_URL is set"
+fi
+if [ -z "$NEXTAUTH_URL" ]; then
+  echo "⚠️  NEXTAUTH_URL not set, using default..."
+  export NEXTAUTH_URL="http://localhost:7860"
+fi
+echo "   NEXTAUTH_URL = $NEXTAUTH_URL"
+echo "========================================================"
+
+# 1. Download the ML model if missing
 echo "--------------------------------------------------------"
 echo "📦 Checking for ML Model Weights..."
 echo "--------------------------------------------------------"

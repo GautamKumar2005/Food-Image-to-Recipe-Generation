@@ -39,19 +39,19 @@ RUN mkdir -p /app/temp_uploads && chmod 777 /app/temp_uploads
 
 # 8. Build the Next.js app 
 WORKDIR /app/frontend
-# Use ARG (not ENV) so these dummy values ONLY exist during build.
-# At runtime, Hugging Face Space Secrets will supply the REAL values.
+# Use ARG for build-time dummy values so Next.js can compile.
+# IMPORTANT: Do NOT set ENV to empty string after build.
+# At runtime, Hugging Face Space Secrets supply the REAL values via environment injection.
 ARG DATABASE_URL="mongodb://dummy"
-ARG NEXTAUTH_SECRET="dummy"
+ARG NEXTAUTH_SECRET="dummy-build-time-secret-not-used"
 ARG NEXTAUTH_URL="http://localhost:7860"
-ENV DATABASE_URL=$DATABASE_URL
-ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-RUN npm run build
-# Clear dummy build-time values. Real values come from HF Space Secrets at runtime.
-ENV DATABASE_URL=""
-ENV NEXTAUTH_SECRET=""
-ENV NEXTAUTH_URL=""
+# Use these ARGs only during the build step
+RUN DATABASE_URL=$DATABASE_URL \
+    NEXTAUTH_SECRET=$NEXTAUTH_SECRET \
+    NEXTAUTH_URL=$NEXTAUTH_URL \
+    npm run build
+# NOTE: We deliberately do NOT set these as ENV here.
+# The real values are injected at container runtime from Hugging Face Space Secrets.
 
 # Final configuration for Hugging Face Spaces (Port 7860 and User 1000)
 EXPOSE 7860
